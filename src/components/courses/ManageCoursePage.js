@@ -5,6 +5,8 @@ import * as authorActions from "../../redux/actions/authorActions";
 import PropTypes from "prop-types";
 import CourseForm from "./CourseForm";
 import { newCourse } from "../../../tools/mockData";
+import Spinner from "../common/Spinner";
+import { toast } from "react-toastify";
 
 const ManageCoursePage = ({
 	authors,
@@ -17,6 +19,7 @@ const ManageCoursePage = ({
 }) => {
 	const [course, setCourse] = useState({ ...props.course });
 	const [errors, setErrors] = useState({});
+	const [saving, setSaving] = useState(false);
 
 	useEffect(() => {
 		if (courses.length === 0) {
@@ -42,21 +45,46 @@ const ManageCoursePage = ({
 		}));
 	};
 
-	const handleSave = event => {
-		event.preventDefault();
-		saveCourse(course).then(() => {
-			history.push("/courses/");
-		});
+	const formIsValid = () => {
+		const { title, authorId, category } = course;
+		const errors = {};
+
+		if (!title) errors.title = "Title is required";
+		if (!authorId) errors.author = "Author is required";
+		if (!category) errors.category = "Category is required";
+
+		setErrors(errors);
+		//Form is valid if errors still has no properties
+		return Object.keys(errors).length === 0;
 	};
 
-	return (
+	const handleSave = event => {
+		event.preventDefault();
+		if (!formIsValid()) return;
+		setSaving(true);
+		saveCourse(course)
+			.then(() => {
+				toast.success("Course Saved!");
+				history.push("/courses/");
+			})
+			.catch(error => {
+				setSaving(false);
+				setErrors({ onSave: error.message });
+				toast.error(error.message);
+			});
+	};
+
+	return courses.length !== 0 && authors.length !== 0 ? (
 		<CourseForm
 			course={course}
 			errors={errors}
 			authors={authors}
 			onChange={handleChange}
 			onSave={handleSave}
+			saving={saving}
 		/>
+	) : (
+		<Spinner />
 	);
 };
 
@@ -83,7 +111,8 @@ function mapStateToProps(state, ownProps) {
 	return {
 		course,
 		courses: state.courses,
-		authors: state.authors
+		authors: state.authors,
+		apiCallsInProgress: state.apiCallsInProgress
 	};
 }
 

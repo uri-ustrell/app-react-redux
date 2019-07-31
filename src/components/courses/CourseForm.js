@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import TextInput from "../common/TextInput.js";
 import SelectInput from "../common/SelectInput.js";
-import ManageCoursePage from "./ManageCoursePage.js";
 
 const CourseForm = ({
 	course,
