@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { defer } from "q";
+//import { defer } from "q";
 
 const SelectInput = ({
 	name,
